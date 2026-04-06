@@ -1,0 +1,1204 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Leu, Ganhou!</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    :root {
+      --bg1: #5a2be0;
+      --bg2: #3047d9;
+      --bg3: #1f3db7;
+      --white: #ffffff;
+      --soft: rgba(255,255,255,0.82);
+      --muted: rgba(255,255,255,0.58);
+      --glass: rgba(255,255,255,0.12);
+      --glass-border: rgba(255,255,255,0.22);
+      --shadow: 0 18px 45px rgba(0,0,0,0.20);
+      --radius-xl: 28px;
+      --radius-lg: 22px;
+      --radius-md: 18px;
+      --text-dark: #24324a;
+    }
+
+    body {
+      font-family: Arial, Helvetica, sans-serif;
+      min-height: 100vh;
+      background:
+        radial-gradient(circle at 8% 12%, rgba(255,255,255,0.45) 0 2px, transparent 3px),
+        radial-gradient(circle at 91% 18%, rgba(255,255,255,0.75) 0 3px, transparent 4px),
+        radial-gradient(circle at 14% 78%, rgba(255,255,255,0.38) 0 2px, transparent 4px),
+        radial-gradient(circle at 84% 86%, rgba(255,255,255,0.35) 0 3px, transparent 4px),
+        radial-gradient(circle at 62% 45%, rgba(255,255,255,0.18) 0 2px, transparent 4px),
+        linear-gradient(180deg, var(--bg1), var(--bg2), var(--bg3));
+      color: var(--white);
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    .screen {
+      min-height: 100vh;
+      width: 100%;
+      padding: 24px 18px;
+    }
+
+    .center-wrap {
+      min-height: calc(100vh - 48px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .entry-card {
+      width: 100%;
+      max-width: 430px;
+      text-align: center;
+      position: relative;
+    }
+
+    .logo-wrap {
+      width: 120px;
+      height: 120px;
+      margin: 0 auto 18px;
+      border-radius: 30px;
+      background: rgba(255,255,255,0.10);
+      border: 1px solid rgba(255,255,255,0.16);
+      backdrop-filter: blur(10px);
+      box-shadow: var(--shadow);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 66px;
+    }
+
+    .entry-title {
+      font-size: 2.4rem;
+      font-weight: 800;
+      margin-bottom: 8px;
+      letter-spacing: -0.5px;
+    }
+
+    .entry-subtitle {
+      font-size: 1.12rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .entry-desc {
+      font-size: 0.96rem;
+      color: var(--soft);
+      line-height: 1.5;
+      margin-bottom: 28px;
+    }
+
+    .section-title {
+      font-size: 1rem;
+      font-weight: 800;
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+      margin-bottom: 16px;
+    }
+
+    .children-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 14px;
+      margin-bottom: 18px;
+    }
+
+    .child-card {
+      background: var(--glass);
+      border: 1.5px solid var(--glass-border);
+      border-radius: 22px;
+      padding: 16px 12px 14px;
+      backdrop-filter: blur(12px);
+      box-shadow: var(--shadow);
+      cursor: pointer;
+      transition: 0.2s ease;
+      min-height: 128px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: white;
+    }
+
+    .child-card:hover {
+      transform: translateY(-2px);
+    }
+
+    .child-card.active {
+      border-color: rgba(255,255,255,0.95);
+      box-shadow: 0 0 0 2px rgba(255,255,255,0.15), var(--shadow);
+      background: rgba(255,255,255,0.16);
+    }
+
+    .child-avatar {
+      width: 58px;
+      height: 58px;
+      border-radius: 18px;
+      background: rgba(255,255,255,0.16);
+      border: 1px solid rgba(255,255,255,0.22);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 30px;
+      margin-bottom: 12px;
+    }
+
+    .child-name {
+      font-size: 1.05rem;
+      font-weight: 800;
+      margin-bottom: 4px;
+    }
+
+    .child-info {
+      font-size: 0.82rem;
+      color: var(--soft);
+    }
+
+    .empty-state {
+      width: 100%;
+      background: rgba(255,255,255,0.10);
+      border: 1.5px dashed rgba(255,255,255,0.25);
+      border-radius: 22px;
+      padding: 18px;
+      color: var(--soft);
+      margin-bottom: 18px;
+    }
+
+    .btn {
+      width: 100%;
+      border: none;
+      border-radius: 18px;
+      padding: 16px 18px;
+      font-size: 1rem;
+      font-weight: 800;
+      cursor: pointer;
+      transition: 0.2s ease;
+    }
+
+    .btn:hover {
+      transform: translateY(-1px);
+    }
+
+    .btn-add {
+      background: rgba(255,255,255,0.10);
+      color: white;
+      border: 1.5px solid rgba(255,255,255,0.22);
+      backdrop-filter: blur(10px);
+      box-shadow: var(--shadow);
+      margin-bottom: 14px;
+    }
+
+    .btn-enter {
+      background: linear-gradient(180deg, rgba(255,255,255,0.18), rgba(255,255,255,0.12));
+      color: white;
+      border: 1.5px solid rgba(255,255,255,0.22);
+      box-shadow: var(--shadow);
+    }
+
+    .btn-enter:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .entry-hint {
+      margin-top: 14px;
+      font-size: 0.85rem;
+      color: var(--muted);
+    }
+
+    .modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(7, 11, 40, 0.58);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 18px;
+      z-index: 50;
+    }
+
+    .modal.show {
+      display: flex;
+    }
+
+    .modal-box {
+      width: 100%;
+      max-width: 420px;
+      background: rgba(24, 31, 92, 0.94);
+      border: 1px solid rgba(255,255,255,0.14);
+      border-radius: 26px;
+      padding: 22px;
+      backdrop-filter: blur(16px);
+      box-shadow: 0 22px 50px rgba(0,0,0,0.30);
+    }
+
+    .modal-box h2 {
+      font-size: 1.3rem;
+      margin-bottom: 16px;
+      text-align: left;
+    }
+
+    .modal-box label {
+      display: block;
+      text-align: left;
+      font-size: 0.94rem;
+      font-weight: 700;
+      margin-bottom: 6px;
+      color: rgba(255,255,255,0.92);
+    }
+
+    .modal-box input,
+    .modal-box select {
+      width: 100%;
+      border: 1.5px solid rgba(255,255,255,0.16);
+      background: rgba(255,255,255,0.10);
+      color: var(--white);
+      border-radius: 14px;
+      padding: 13px 14px;
+      outline: none;
+      margin-bottom: 14px;
+      font-size: 0.96rem;
+    }
+
+    .modal-box input::placeholder {
+      color: rgba(255,255,255,0.52);
+    }
+
+    .modal-box select option {
+      color: #111827;
+    }
+
+    .modal-actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 4px;
+    }
+
+    .btn-cancel,
+    .btn-save {
+      border: none;
+      border-radius: 14px;
+      padding: 14px;
+      font-weight: 800;
+      cursor: pointer;
+      font-size: 0.95rem;
+    }
+
+    .btn-cancel {
+      background: rgba(255,255,255,0.10);
+      color: var(--white);
+      border: 1px solid rgba(255,255,255,0.15);
+    }
+
+    .btn-save {
+      background: linear-gradient(135deg, #8b5cf6, #ec4899);
+      color: white;
+    }
+
+    .app-shell {
+      max-width: 1200px;
+      margin: 0 auto;
+      color: var(--text-dark);
+    }
+
+    .hero {
+      background: linear-gradient(135deg, #7c3aed, #ec4899, #f59e0b);
+      color: white;
+      border-radius: 28px;
+      padding: 26px;
+      box-shadow: 0 15px 35px rgba(0,0,0,.10);
+      margin-bottom: 20px;
+    }
+
+    .hero h1 {
+      font-size: 2rem;
+      margin-bottom: 8px;
+    }
+
+    .hero p {
+      opacity: 0.95;
+      line-height: 1.5;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 18px;
+    }
+
+    .card {
+      background: white;
+      border-radius: 24px;
+      padding: 20px;
+      box-shadow: 0 15px 35px rgba(0,0,0,.10);
+    }
+
+    .card h2 {
+      font-size: 1.1rem;
+      margin-bottom: 14px;
+      color: var(--text-dark);
+    }
+
+    .profile-top {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      background: linear-gradient(135deg, #fdf4ff, #eff6ff);
+      border-radius: 22px;
+      padding: 18px;
+    }
+
+    .profile-avatar {
+      width: 90px;
+      height: 90px;
+      border-radius: 50%;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2.4rem;
+      color: white;
+      background: linear-gradient(135deg, #facc15, #fb7185);
+    }
+
+    .profile-top h2 {
+      margin-bottom: 8px;
+      font-size: 1.4rem;
+    }
+
+    .muted-dark {
+      color: #64748b;
+      font-size: .93rem;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 14px;
+      margin-bottom: 18px;
+    }
+
+    .stat-box {
+      border-radius: 20px;
+      padding: 18px;
+      text-align: center;
+      color: white;
+      box-shadow: 0 15px 35px rgba(0,0,0,.10);
+    }
+
+    .stat-box strong {
+      display: block;
+      font-size: 1.6rem;
+      margin-bottom: 6px;
+    }
+
+    .stat-purple { background: linear-gradient(135deg, #7c3aed, #ec4899); }
+    .stat-green { background: linear-gradient(135deg, #22c55e, #16a34a); }
+    .stat-blue { background: linear-gradient(135deg, #3b82f6, #2563eb); }
+    .stat-orange { background: linear-gradient(135deg, #f59e0b, #fb7185); }
+
+    .form-label {
+      display: block;
+      font-weight: 700;
+      margin-bottom: 6px;
+      font-size: .95rem;
+      color: var(--text-dark);
+    }
+
+    .form-input,
+    .form-select {
+      width: 100%;
+      padding: 12px 14px;
+      border: 2px solid #e2e8f0;
+      border-radius: 14px;
+      outline: none;
+      font-size: .96rem;
+      margin-bottom: 14px;
+      background: #fff;
+      color: var(--text-dark);
+    }
+
+    .form-input:focus,
+    .form-select:focus {
+      border-color: #8b5cf6;
+    }
+
+    .action-row {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+    }
+
+    .btn-soft-dark,
+    .btn-danger,
+    .btn-primary-dark,
+    .btn-green,
+    .btn-orange {
+      border: none;
+      border-radius: 14px;
+      padding: 12px 16px;
+      font-size: .96rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: .2s ease;
+      width: 100%;
+    }
+
+    .btn-soft-dark {
+      background: #eff6ff;
+      color: #1d4ed8;
+      border: 1px solid #bfdbfe;
+    }
+
+    .btn-danger {
+      background: linear-gradient(135deg, #ef4444, #dc2626);
+      color: #fff;
+    }
+
+    .btn-primary-dark {
+      background: linear-gradient(135deg, #7c3aed, #ec4899);
+      color: #fff;
+    }
+
+    .btn-green {
+      background: linear-gradient(135deg, #22c55e, #16a34a);
+      color: #fff;
+    }
+
+    .btn-orange {
+      background: linear-gradient(135deg, #f59e0b, #fb7185);
+      color: #fff;
+    }
+
+    .quick-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .quick-row button {
+      background: #eff6ff;
+      color: #1e3a8a;
+      border: 1px solid #bfdbfe;
+      border-radius: 14px;
+      padding: 11px 8px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .reward-box {
+      background: linear-gradient(135deg, #fef3c7, #fde68a);
+      color: #7c2d12;
+      border-radius: 18px;
+      padding: 14px;
+      margin-top: 14px;
+      font-weight: 700;
+      text-align: center;
+    }
+
+    .book-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 14px;
+      margin-top: 14px;
+    }
+
+    .book-card {
+      background: linear-gradient(135deg, #ffffff, #f8fafc);
+      border: 2px solid #eef2ff;
+      border-radius: 20px;
+      padding: 16px;
+    }
+
+    .book-card h3 {
+      font-size: 1.04rem;
+      margin-bottom: 6px;
+    }
+
+    .book-card p {
+      color: #64748b;
+      margin-bottom: 6px;
+      font-size: .92rem;
+    }
+
+    .progress {
+      width: 100%;
+      height: 12px;
+      border-radius: 999px;
+      background: #e2e8f0;
+      overflow: hidden;
+      margin: 10px 0;
+    }
+
+    .progress span {
+      display: block;
+      height: 100%;
+      border-radius: 999px;
+      background: linear-gradient(135deg, #22c55e, #3b82f6);
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-size: .8rem;
+      font-weight: 700;
+      margin-top: 6px;
+      background: #ede9fe;
+      color: #6d28d9;
+    }
+
+    .history {
+      max-height: 360px;
+      overflow: auto;
+      margin-top: 10px;
+    }
+
+    .history-item {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 16px;
+      padding: 12px;
+      margin-bottom: 10px;
+    }
+
+    .history-item strong {
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    .level {
+      margin-top: 10px;
+      padding: 12px;
+      border-radius: 16px;
+      text-align: center;
+      font-weight: 700;
+      color: #1d4ed8;
+      background: linear-gradient(135deg, #ecfeff, #dbeafe);
+    }
+
+    @media (max-width: 768px) {
+      .stats {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .quick-row {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .action-row,
+      .modal-actions {
+        grid-template-columns: 1fr;
+      }
+
+      .profile-top {
+        flex-direction: column;
+        text-align: center;
+      }
+
+      .entry-title {
+        font-size: 2rem;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- TELA INICIAL -->
+  <section id="entryScreen" class="screen">
+    <div class="center-wrap">
+      <div class="entry-card">
+        <div class="logo-wrap">📚</div>
+        <div class="entry-title">Leu, Ganhou!</div>
+        <div class="entry-subtitle">Leia mais, jogue mais! 🎮</div>
+        <div class="entry-desc">
+          Cada página lida vale 2 minutos de videogame. Cadastre a criança, selecione o perfil e entre no app.
+        </div>
+
+        <div class="section-title">Quem vai ler hoje?</div>
+
+        <div id="childrenContainer"></div>
+
+        <button class="btn btn-add" type="button" onclick="openModal()">＋ Adicionar criança</button>
+        <button class="btn btn-enter" id="enterBtn" type="button" onclick="enterApp()" disabled>Entrar ➜</button>
+
+        <div class="entry-hint">⚙️ Depois você pode cadastrar livros, registrar páginas e controlar os minutos.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- MODAL -->
+  <div class="modal" id="childModal">
+    <div class="modal-box">
+      <h2>Adicionar criança</h2>
+
+      <label for="childName">Nome</label>
+      <input id="childName" type="text" placeholder="Digite o nome da criança" />
+
+      <label for="childAge">Idade</label>
+      <input id="childAge" type="number" placeholder="Ex: 8" />
+
+      <label for="childAvatar">Avatar</label>
+      <select id="childAvatar">
+        <option value="🧒">🧒 Criança</option>
+        <option value="👦">👦 Menino</option>
+        <option value="👧">👧 Menina</option>
+        <option value="🦸">🦸 Herói</option>
+        <option value="🦄">🦄 Unicórnio</option>
+        <option value="🚀">🚀 Foguete</option>
+        <option value="🐼">🐼 Panda</option>
+      </select>
+
+      <label for="childGoal">Meta semanal de páginas</label>
+      <input id="childGoal" type="number" placeholder="Ex: 30" />
+
+      <div class="modal-actions">
+        <button class="btn-cancel" type="button" onclick="closeModal()">Cancelar</button>
+        <button class="btn-save" type="button" onclick="saveChild()">Salvar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- APP -->
+  <section id="appScreen" class="screen hidden">
+    <div class="app-shell">
+      <div class="hero">
+        <h1>Leu, Ganhou!</h1>
+        <p>Perfil individual da criança com livros, minutos, histórico e conquistas.</p>
+      </div>
+
+      <div class="card" style="margin-bottom: 18px;">
+        <div class="action-row" style="margin-bottom:14px;">
+          <button class="btn-soft-dark" onclick="backToEntry()">← Voltar para crianças</button>
+          <button class="btn-danger" onclick="deleteCurrentChild()">Apagar esta criança</button>
+        </div>
+        <div id="profileTop"></div>
+      </div>
+
+      <div class="stats">
+        <div class="stat-box stat-purple">
+          <strong id="saldoMinutos">0</strong>
+          <span>Minutos disponíveis</span>
+        </div>
+        <div class="stat-box stat-green">
+          <strong id="totalPaginas">0</strong>
+          <span>Páginas lidas</span>
+        </div>
+        <div class="stat-box stat-blue">
+          <strong id="totalLivros">0</strong>
+          <span>Livros cadastrados</span>
+        </div>
+        <div class="stat-box stat-orange">
+          <strong id="livrosConcluidos">0</strong>
+          <span>Livros concluídos</span>
+        </div>
+      </div>
+
+      <div class="grid">
+        <div class="card">
+          <h2>📖 Cadastrar livro</h2>
+
+          <label class="form-label">Título do livro</label>
+          <input class="form-input" type="text" id="tituloLivro" placeholder="Ex: O Pequeno Príncipe" />
+
+          <label class="form-label">Autor</label>
+          <input class="form-input" type="text" id="autorLivro" placeholder="Ex: Antoine de Saint-Exupéry" />
+
+          <label class="form-label">Categoria</label>
+          <input class="form-input" type="text" id="categoriaLivro" placeholder="Ex: Aventura" />
+
+          <label class="form-label">Total de páginas</label>
+          <input class="form-input" type="number" id="totalPaginasLivro" placeholder="Ex: 96" />
+
+          <button class="btn-green" onclick="addBook()">Cadastrar livro</button>
+        </div>
+
+        <div class="card">
+          <h2>🎮 Usar minutos</h2>
+
+          <label class="form-label">Quantos minutos deseja usar?</label>
+          <input class="form-input" type="number" id="minutosUsar" placeholder="Ex: 20" />
+
+          <div class="action-row">
+            <button class="btn-orange" onclick="useMinutes()">Confirmar uso</button>
+            <button class="btn-primary-dark" onclick="useAllMinutes()">Usar tudo</button>
+          </div>
+
+          <div class="quick-row">
+            <button onclick="setMinutes(10)">10 min</button>
+            <button onclick="setMinutes(20)">20 min</button>
+            <button onclick="setMinutes(30)">30 min</button>
+            <button onclick="setMinutes(60)">60 min</button>
+          </div>
+
+          <div class="reward-box">
+            Saldo atual: <span id="saldoUso">0</span> minutos
+          </div>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top: 18px;">
+        <h2>📚 Livros cadastrados</h2>
+        <div id="listaLivros" class="book-list"></div>
+      </div>
+
+      <div class="grid" style="margin-top: 18px;">
+        <div class="card">
+          <h2>🏆 Conquistas</h2>
+          <div id="conquistas"></div>
+          <div class="level" id="nivelLeitor">Nível atual: Leitor Iniciante</div>
+        </div>
+
+        <div class="card">
+          <h2>🕓 Histórico</h2>
+          <div id="historico" class="history"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <script>
+    const STORAGE_KEY = "leu_ganhou_app_v2";
+    let children = [];
+    let selectedChildId = null;
+    let currentChildId = null;
+
+    function saveStorage() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({
+        children,
+        selectedChildId,
+        currentChildId
+      }));
+    }
+
+    function loadStorage() {
+      const data = localStorage.getItem(STORAGE_KEY);
+      if (!data) return;
+
+      try {
+        const parsed = JSON.parse(data);
+        children = parsed.children || [];
+        selectedChildId = parsed.selectedChildId || null;
+        currentChildId = parsed.currentChildId || null;
+      } catch (error) {
+        console.error("Erro ao carregar dados:", error);
+      }
+    }
+
+    function createId() {
+      return Date.now() + Math.floor(Math.random() * 1000);
+    }
+
+    function openModal() {
+      document.getElementById("childModal").classList.add("show");
+    }
+
+    function closeModal() {
+      document.getElementById("childModal").classList.remove("show");
+      document.getElementById("childName").value = "";
+      document.getElementById("childAge").value = "";
+      document.getElementById("childAvatar").value = "🧒";
+      document.getElementById("childGoal").value = "";
+    }
+
+    function saveChild() {
+      const name = document.getElementById("childName").value.trim();
+      const age = document.getElementById("childAge").value.trim();
+      const avatar = document.getElementById("childAvatar").value;
+      const goal = Number(document.getElementById("childGoal").value || 0);
+
+      if (!name) {
+        alert("Digite o nome da criança.");
+        return;
+      }
+
+      const newChild = {
+        id: createId(),
+        nome: name,
+        idade: age,
+        avatar: avatar,
+        metaSemanal: goal,
+        saldoMinutos: 0,
+        totalPaginasLidas: 0,
+        livros: [],
+        historico: []
+      };
+
+      children.push(newChild);
+      selectedChildId = newChild.id;
+      saveStorage();
+      closeModal();
+      renderEntry();
+    }
+
+    function renderEntry() {
+      const container = document.getElementById("childrenContainer");
+      const enterBtn = document.getElementById("enterBtn");
+
+      if (children.length === 0) {
+        container.innerHTML = `
+          <div class="empty-state">
+            Nenhuma criança cadastrada ainda. Clique em <strong>Adicionar criança</strong> para começar.
+          </div>
+        `;
+        enterBtn.disabled = true;
+        return;
+      }
+
+      container.innerHTML = `
+        <div class="children-grid">
+          ${children.map(child => `
+            <button
+              class="child-card ${selectedChildId === child.id ? 'active' : ''}"
+              type="button"
+              onclick="selectChild(${child.id})"
+            >
+              <div class="child-avatar">${child.avatar}</div>
+              <div class="child-name">${child.nome}</div>
+              <div class="child-info">${child.idade ? child.idade + ' anos' : 'Sem idade'}</div>
+            </button>
+          `).join("")}
+        </div>
+      `;
+
+      enterBtn.disabled = !selectedChildId;
+    }
+
+    function selectChild(id) {
+      selectedChildId = id;
+      saveStorage();
+      renderEntry();
+    }
+
+    function enterApp() {
+      if (!selectedChildId) {
+        alert("Selecione uma criança para entrar.");
+        return;
+      }
+
+      currentChildId = selectedChildId;
+      saveStorage();
+
+      document.getElementById("entryScreen").classList.add("hidden");
+      document.getElementById("appScreen").classList.remove("hidden");
+
+      renderApp();
+    }
+
+    function backToEntry() {
+      document.getElementById("appScreen").classList.add("hidden");
+      document.getElementById("entryScreen").classList.remove("hidden");
+      renderEntry();
+    }
+
+    function getCurrentChild() {
+      return children.find(child => child.id === currentChildId);
+    }
+
+    function renderApp() {
+      const child = getCurrentChild();
+      if (!child) {
+        backToEntry();
+        return;
+      }
+
+      document.getElementById("profileTop").innerHTML = `
+        <div class="profile-top">
+          <div class="profile-avatar">${child.avatar}</div>
+          <div>
+            <h2>${child.nome}</h2>
+            <div class="muted-dark">Idade: ${child.idade || "-"}</div>
+            <div class="muted-dark">Meta semanal: ${child.metaSemanal || 0} páginas</div>
+          </div>
+        </div>
+      `;
+
+      document.getElementById("saldoMinutos").textContent = child.saldoMinutos;
+      document.getElementById("saldoUso").textContent = child.saldoMinutos;
+      document.getElementById("totalPaginas").textContent = child.totalPaginasLidas;
+      document.getElementById("totalLivros").textContent = child.livros.length;
+      document.getElementById("livrosConcluidos").textContent = child.livros.filter(book => book.concluido).length;
+
+      renderBooks();
+      renderHistory();
+      renderAchievements();
+    }
+
+    function addBook() {
+      const child = getCurrentChild();
+      if (!child) return;
+
+      const titulo = document.getElementById("tituloLivro").value.trim();
+      const autor = document.getElementById("autorLivro").value.trim();
+      const categoria = document.getElementById("categoriaLivro").value.trim();
+      const totalPaginas = Number(document.getElementById("totalPaginasLivro").value || 0);
+
+      if (!titulo || totalPaginas <= 0) {
+        alert("Preencha o título e o total de páginas corretamente.");
+        return;
+      }
+
+      child.livros.push({
+        id: createId(),
+        titulo,
+        autor,
+        categoria,
+        totalPaginas,
+        paginaAtual: 0,
+        concluido: false
+      });
+
+      document.getElementById("tituloLivro").value = "";
+      document.getElementById("autorLivro").value = "";
+      document.getElementById("categoriaLivro").value = "";
+      document.getElementById("totalPaginasLivro").value = "";
+
+      saveStorage();
+      renderApp();
+    }
+
+    function renderBooks() {
+      const child = getCurrentChild();
+      if (!child) return;
+
+      const list = document.getElementById("listaLivros");
+
+      if (child.livros.length === 0) {
+        list.innerHTML = `<div class="muted-dark">Nenhum livro cadastrado ainda.</div>`;
+        return;
+      }
+
+      list.innerHTML = child.livros.map(book => {
+        const progress = Math.round((book.paginaAtual / book.totalPaginas) * 100) || 0;
+
+        return `
+          <div class="book-card">
+            <h3>${book.titulo}</h3>
+            <p><strong>Autor:</strong> ${book.autor || "-"}</p>
+            <p><strong>Categoria:</strong> ${book.categoria || "-"}</p>
+            <p><strong>Página atual:</strong> ${book.paginaAtual} / ${book.totalPaginas}</p>
+            <div class="progress"><span style="width:${progress}%"></span></div>
+            <p>Progresso: ${progress}%</p>
+            <span class="badge">${book.concluido ? "Concluído ✅" : "Em andamento 📘"}</span>
+
+            <div style="margin-top:12px;">
+              <label class="form-label">Nova página</label>
+              <input class="form-input" type="number" id="pagina-${book.id}" placeholder="Ex: ${book.paginaAtual + 1}" />
+              <button class="btn-primary-dark" onclick="registerReading(${book.id})">Registrar leitura</button>
+            </div>
+          </div>
+        `;
+      }).join("");
+    }
+
+    function registerReading(bookId) {
+      const child = getCurrentChild();
+      if (!child) return;
+
+      const book = child.livros.find(item => item.id === bookId);
+      const input = document.getElementById(`pagina-${bookId}`);
+      const newPage = Number(input.value);
+
+      if (!book) return;
+
+      if (newPage <= book.paginaAtual) {
+        alert("A nova página precisa ser maior que a página atual.");
+        return;
+      }
+
+      if (newPage > book.totalPaginas) {
+        alert("A nova página não pode ser maior que o total do livro.");
+        return;
+      }
+
+      const paginasLidas = newPage - book.paginaAtual;
+      const minutosGanhos = paginasLidas * 2;
+      const paginaAnterior = book.paginaAtual;
+
+      book.paginaAtual = newPage;
+      child.saldoMinutos += minutosGanhos;
+      child.totalPaginasLidas += paginasLidas;
+
+      if (book.paginaAtual === book.totalPaginas) {
+        book.concluido = true;
+      }
+
+      child.historico.unshift({
+        tipo: "leitura",
+        data: new Date().toLocaleString("pt-BR"),
+        livro: book.titulo,
+        paginaAnterior,
+        paginaAtual: newPage,
+        paginasLidas,
+        minutosGanhos,
+        saldo: child.saldoMinutos
+      });
+
+      input.value = "";
+      saveStorage();
+      renderApp();
+    }
+
+    function setMinutes(value) {
+      document.getElementById("minutosUsar").value = value;
+    }
+
+    function useAllMinutes() {
+      const child = getCurrentChild();
+      if (!child) return;
+
+      if (child.saldoMinutos <= 0) {
+        alert("Não há minutos disponíveis.");
+        return;
+      }
+
+      document.getElementById("minutosUsar").value = child.saldoMinutos;
+    }
+
+    function useMinutes() {
+      const child = getCurrentChild();
+      if (!child) return;
+
+      const minutos = Number(document.getElementById("minutosUsar").value || 0);
+
+      if (minutos <= 0) {
+        alert("Digite um valor válido.");
+        return;
+      }
+
+      if (minutos > child.saldoMinutos) {
+        alert("Não há minutos suficientes.");
+        return;
+      }
+
+      child.saldoMinutos -= minutos;
+
+      child.historico.unshift({
+        tipo: "uso",
+        data: new Date().toLocaleString("pt-BR"),
+        minutosUsados: minutos,
+        saldo: child.saldoMinutos
+      });
+
+      document.getElementById("minutosUsar").value = "";
+      saveStorage();
+      renderApp();
+    }
+
+    function renderHistory() {
+      const child = getCurrentChild();
+      if (!child) return;
+
+      const box = document.getElementById("historico");
+
+      if (child.historico.length === 0) {
+        box.innerHTML = `<div class="muted-dark">Ainda não há movimentações.</div>`;
+        return;
+      }
+
+      box.innerHTML = child.historico.map(item => {
+        if (item.tipo === "leitura") {
+          return `
+            <div class="history-item">
+              <strong>📖 Leitura registrada</strong>
+              <div class="muted-dark">${item.data}</div>
+              <div>Livro: <strong>${item.livro}</strong></div>
+              <div>Página: ${item.paginaAnterior} → ${item.paginaAtual}</div>
+              <div>Páginas lidas: ${item.paginasLidas}</div>
+              <div>Minutos ganhos: <strong>+${item.minutosGanhos}</strong></div>
+              <div>Saldo após ação: <strong>${item.saldo} min</strong></div>
+            </div>
+          `;
+        }
+
+        return `
+          <div class="history-item">
+            <strong>🎮 Minutos usados</strong>
+            <div class="muted-dark">${item.data}</div>
+            <div>Minutos usados: <strong>-${item.minutosUsados}</strong></div>
+            <div>Saldo após ação: <strong>${item.saldo} min</strong></div>
+          </div>
+        `;
+      }).join("");
+    }
+
+    function renderAchievements() {
+      const child = getCurrentChild();
+      if (!child) return;
+
+      const doneBooks = child.livros.filter(book => book.concluido).length;
+      const pages = child.totalPaginasLidas;
+      const achievements = [];
+
+      if (pages >= 1) achievements.push("⭐ Primeira página lida");
+      if (pages >= 10) achievements.push("📘 10 páginas lidas");
+      if (pages >= 50) achievements.push("🚀 50 páginas lidas");
+      if (doneBooks >= 1) achievements.push("🏆 Primeiro livro concluído");
+      if (doneBooks >= 3) achievements.push("👑 3 livros concluídos");
+
+      const box = document.getElementById("conquistas");
+      if (achievements.length === 0) {
+        box.innerHTML = `<div class="muted-dark">As conquistas vão aparecer conforme a leitura evoluir.</div>`;
+      } else {
+        box.innerHTML = achievements.map(item => `<div class="history-item">${item}</div>`).join("");
+      }
+
+      let level = "Leitor Iniciante";
+      if (pages >= 20) level = "Leitor Dedicado";
+      if (pages >= 50) level = "Super Leitor";
+      if (pages >= 100) level = "Mestre dos Livros";
+
+      document.getElementById("nivelLeitor").textContent = `Nível atual: ${level}`;
+    }
+
+    function deleteCurrentChild() {
+      const child = getCurrentChild();
+      if (!child) return;
+
+      const confirmDelete = confirm(`Tem certeza que deseja apagar o perfil de ${child.nome}?`);
+      if (!confirmDelete) return;
+
+      children = children.filter(item => item.id !== currentChildId);
+
+      if (selectedChildId === currentChildId) {
+        selectedChildId = children.length ? children[0].id : null;
+      }
+
+      currentChildId = null;
+      saveStorage();
+      backToEntry();
+      renderEntry();
+    }
+
+    function startCorrectScreen() {
+      renderEntry();
+
+      if (currentChildId && children.find(child => child.id === currentChildId)) {
+        document.getElementById("entryScreen").classList.add("hidden");
+        document.getElementById("appScreen").classList.remove("hidden");
+        renderApp();
+      } else {
+        document.getElementById("appScreen").classList.add("hidden");
+        document.getElementById("entryScreen").classList.remove("hidden");
+      }
+    }
+
+    loadStorage();
+    startCorrectScreen();
+  </script>
+</body>
+</html>
