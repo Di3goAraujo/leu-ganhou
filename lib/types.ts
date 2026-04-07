@@ -4,6 +4,13 @@ export type Profile = {
   created_at: string;
 };
 
+export type ParentSettings = {
+  parent_id: string;
+  parent_pin: string;
+  created_at: string;
+  updated_at: string;
+};
+
 export type Child = {
   id: string;
   parent_id: string;

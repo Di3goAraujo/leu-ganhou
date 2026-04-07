@@ -28,8 +28,9 @@ export default function LoginPage() {
         if (error) throw error;
         if (data.user) {
           await supabase.from('profiles').upsert({ id: data.user.id, full_name: fullName });
+          await supabase.from('parent_settings').upsert({ parent_id: data.user.id, parent_pin: '1234' });
         }
-        setMessage('Conta criada. Agora faça login.');
+        setMessage('Conta criada com sucesso. O PIN inicial da área dos pais é 1234. Agora faça login.');
         setMode('login');
       } else {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
@@ -49,7 +50,7 @@ export default function LoginPage() {
         <div className="logo">📚</div>
         <h1 className="title">Leu, Ganhou!</h1>
         <p className="subtitle">
-          Área dos pais com login real, crianças com perfis separados e relatórios salvos na nuvem.
+          O responsável entra com login, e a área dos pais continua protegida por PIN separado.
         </p>
 
         <form onSubmit={handleSubmit}>

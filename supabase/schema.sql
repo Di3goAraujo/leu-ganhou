@@ -131,3 +131,19 @@ create index if not exists idx_children_parent_id on public.children(parent_id);
 create index if not exists idx_books_child_id on public.books(child_id);
 create index if not exists idx_reading_logs_child_id on public.reading_logs(child_id);
 create index if not exists idx_minute_transactions_child_id on public.minute_transactions(child_id);
+
+
+create table if not exists public.parent_settings (
+  parent_id uuid primary key references auth.users(id) on delete cascade,
+  parent_pin text not null default '1234',
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+alter table public.parent_settings enable row level security;
+
+create policy "parents manage own settings"
+on public.parent_settings
+for all
+using (auth.uid() = parent_id)
+with check (auth.uid() = parent_id);

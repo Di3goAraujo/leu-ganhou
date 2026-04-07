@@ -1,69 +1,46 @@
 # Leu, Ganhou! — MVP Next.js + Supabase
 
-Projeto pronto para evoluir o app infantil de leitura em uma versão web profissional com área dos pais.
+Projeto web com:
+- login do responsável
+- perfis múltiplos de crianças
+- cadastro de livros
+- registro de leitura
+- minutos ganhos e usados
+- área dos pais protegida por PIN separado
+- troca de PIN dentro da área dos pais
 
 ## Stack
-- Next.js App Router
-- React + TypeScript
-- Supabase Auth
-- Supabase Postgres + RLS
+- Next.js
+- TypeScript
+- Supabase Auth + Database
+- Vercel
 
-## O que já vem pronto
-- Login e cadastro do responsável
-- Dashboard com perfis das crianças
-- Perfil individual de cada criança
-- Cadastro de livros
-- Registro de leitura com regra de 2 minutos por página
-- Uso de minutos
-- Área dos pais com bônus, exclusão de criança e exclusão de livro
-- Relatórios básicos
-
-## 1) Criar o projeto no Supabase
-1. Crie um projeto no Supabase.
-2. Abra o SQL Editor.
-3. Execute o arquivo `supabase/schema.sql`.
-4. Em **Project Settings > API**, copie:
-   - `Project URL`
-   - `anon public key`
-
-## 2) Configurar ambiente local
-Copie `.env.example` para `.env.local` e preencha:
-
-```bash
-cp .env.example .env.local
-```
-
-## 3) Instalar dependências
-Use Node.js 20.9 ou superior. O Next.js App Router lista Node 20.9 como mínimo na documentação oficial. citeturn327637search7turn327637search1
-
+## Rodando localmente
 ```bash
 npm install
-```
-
-## 4) Rodar o projeto
-```bash
 npm run dev
 ```
 
-Abra `http://localhost:3000`.
+Crie um arquivo `.env.local` com base em `.env.example`.
 
-## 5) Publicar
-Você pode publicar na Vercel. O fluxo oficial do Next.js continua centrado no App Router e deploy em plataformas compatíveis com recursos do framework. citeturn327637search11turn327637search16
-
-## 6) GitHub
-```bash
-git init
-git add .
-git commit -m "feat: leu ganhou mvp com supabase"
+## Variáveis de ambiente
+```env
+NEXT_PUBLIC_SUPABASE_URL=
+NEXT_PUBLIC_SUPABASE_ANON_KEY=
 ```
 
-Depois crie o repositório no GitHub e rode:
+## Banco de dados
+Execute o conteúdo de `supabase/schema.sql` no SQL Editor do Supabase.
 
-```bash
-git remote add origin https://github.com/SEU-USUARIO/leu-ganhou.git
-git branch -M main
-git push -u origin main
-```
+## Importante nesta versão
+Se você já tinha rodado o schema antigo, rode de novo o `schema.sql` atualizado para criar a tabela:
+- `parent_settings`
 
-## Observações
-O quickstart oficial do Supabase para Next.js usa App Router, TypeScript e autenticação configurada para esse stack. citeturn327637search0turn327637search2
+Essa tabela guarda o PIN da área dos pais por conta.
+
+## Fluxo do app
+- O responsável entra com login e senha.
+- A criança usa a área principal e o perfil dela.
+- A área dos pais pede PIN separado.
+- PIN inicial: `1234`
+- Os pais podem trocar o PIN dentro da área dos pais.

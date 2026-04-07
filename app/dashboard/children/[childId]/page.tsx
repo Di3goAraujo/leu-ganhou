@@ -139,7 +139,7 @@ function ChildContent() {
         </div>
         <div className="topbar-actions">
           <Link className="btn btn-soft" href="/dashboard">Voltar</Link>
-          <Link className="btn btn-blue" href="/dashboard/parents">Área dos pais</Link>
+          <Link className="btn btn-blue" href="/dashboard/parents">Área dos pais 🔐</Link>
         </div>
       </div>
 
@@ -204,7 +204,7 @@ function ChildContent() {
           <div className="book-list">
             {books.map((book) => {
               const progress = Math.round((book.current_page / book.total_pages) * 100) || 0;
-              let nextPage = book.current_page + 1;
+              const nextPage = book.current_page + 1;
               return (
                 <BookReadingCard key={book.id} book={book} progress={progress} nextPage={nextPage} onSave={registerReading} />
               );

@@ -5,7 +5,9 @@ import { useEffect, useMemo, useState } from 'react';
 import { AuthGuard } from '@/components/auth-guard';
 import { LogoutButton } from '@/components/logout-button';
 import { supabase } from '@/lib/supabase';
-import type { Book, Child, MinuteTransaction, ReadingLog } from '@/lib/types';
+import type { Book, Child, MinuteTransaction, ParentSettings, ReadingLog } from '@/lib/types';
+
+const PIN_SESSION_KEY = 'leu_ganhou_parent_pin_ok';
 
 export default function ParentsPage() {
   return (
@@ -20,9 +22,45 @@ function ParentsContent() {
   const [books, setBooks] = useState<Book[]>([]);
   const [logs, setLogs] = useState<ReadingLog[]>([]);
   const [minutes, setMinutes] = useState<MinuteTransaction[]>([]);
+  const [settings, setSettings] = useState<ParentSettings | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [pinReady, setPinReady] = useState(false);
+  const [pinValue, setPinValue] = useState('');
   const [message, setMessage] = useState('');
+  const [pinMessage, setPinMessage] = useState('');
+  const [pinForm, setPinForm] = useState({ current: '', next: '', confirm: '' });
+
+  async function ensureSettings() {
+    const { data: authData } = await supabase.auth.getUser();
+    const user = authData.user;
+    if (!user) return null;
+
+    const { data, error } = await supabase.from('parent_settings').select('*').eq('parent_id', user.id).single();
+    if (data) {
+      setSettings(data as ParentSettings);
+      return data as ParentSettings;
+    }
+
+    if (error) {
+      const { data: created, error: createError } = await supabase
+        .from('parent_settings')
+        .upsert({ parent_id: user.id, parent_pin: '1234' })
+        .select('*')
+        .single();
+      if (createError) {
+        setPinMessage(createError.message);
+        return null;
+      }
+      setSettings(created as ParentSettings);
+      return created as ParentSettings;
+    }
+
+    return null;
+  }
 
   async function loadAll() {
+    setLoading(true);
+    const currentSettings = await ensureSettings();
     const [{ data: childrenData }, { data: booksData }, { data: logsData }, { data: minutesData }] = await Promise.all([
       supabase.from('children').select('*').order('created_at', { ascending: true }),
       supabase.from('books').select('*').order('created_at', { ascending: false }),
@@ -34,6 +72,10 @@ function ParentsContent() {
     setBooks((booksData ?? []) as Book[]);
     setLogs((logsData ?? []) as ReadingLog[]);
     setMinutes((minutesData ?? []) as MinuteTransaction[]);
+    setLoading(false);
+
+    const hasSessionPin = typeof window !== 'undefined' && sessionStorage.getItem(PIN_SESSION_KEY) === 'ok';
+    setPinReady(Boolean(hasSessionPin && currentSettings));
   }
 
   useEffect(() => {
@@ -48,6 +90,60 @@ function ParentsContent() {
     minutes: minutes.reduce((sum, item) => sum + item.minutes_delta, 0),
     history: logs.length + minutes.length,
   }), [children, books, logs, minutes]);
+
+  async function validatePin(e: React.FormEvent) {
+    e.preventDefault();
+    setPinMessage('');
+    const currentSettings = settings ?? await ensureSettings();
+    if (!currentSettings) return;
+
+    if (pinValue.trim() !== currentSettings.parent_pin) {
+      setPinMessage('PIN incorreto.');
+      return;
+    }
+
+    sessionStorage.setItem(PIN_SESSION_KEY, 'ok');
+    setPinReady(true);
+    setPinValue('');
+  }
+
+  async function changePin(e: React.FormEvent) {
+    e.preventDefault();
+    setMessage('');
+    const currentSettings = settings ?? await ensureSettings();
+    if (!currentSettings) return;
+
+    if (pinForm.current !== currentSettings.parent_pin) {
+      setMessage('PIN atual incorreto.');
+      return;
+    }
+    if (!pinForm.next.trim()) {
+      setMessage('Digite o novo PIN.');
+      return;
+    }
+    if (pinForm.next !== pinForm.confirm) {
+      setMessage('A confirmação do novo PIN não confere.');
+      return;
+    }
+
+    const { data, error } = await supabase
+      .from('parent_settings')
+      .update({ parent_pin: pinForm.next.trim() })
+      .eq('parent_id', currentSettings.parent_id)
+      .select('*')
+      .single();
+
+    if (error) {
+      setMessage(error.message);
+      return;
+    }
+
+    setSettings(data as ParentSettings);
+    setPinForm({ current: '', next: '', confirm: '' });
+    sessionStorage.removeItem(PIN_SESSION_KEY);
+    setPinReady(false);
+    setMessage('PIN alterado com sucesso. Digite o novo PIN para entrar novamente na área dos pais.');
+  }
 
   async function addBonus(childId: string, amount: number) {
     setMessage('');
@@ -75,6 +171,33 @@ function ParentsContent() {
     await loadAll();
   }
 
+  if (loading) {
+    return <div className="center-shell"><div className="glass-card"><p className="subtitle">Carregando área dos pais...</p></div></div>;
+  }
+
+  if (!pinReady) {
+    return (
+      <div className="center-shell">
+        <div className="glass-card">
+          <div className="logo">🔐</div>
+          <h1 className="title">Área dos pais</h1>
+          <p className="subtitle">Digite o PIN para liberar as ações administrativas.</p>
+          <form onSubmit={validatePin}>
+            <label className="label">PIN dos pais</label>
+            <input className="input" type="password" value={pinValue} onChange={(e) => setPinValue(e.target.value)} placeholder="Digite o PIN" required />
+            <button className="btn btn-primary btn-block" type="submit">Entrar na área dos pais</button>
+          </form>
+          <div className="spacer" />
+          <Link className="btn btn-soft btn-block" href="/dashboard">Voltar</Link>
+          <div className="spacer" />
+          <div className="notice">PIN inicial: 1234. Depois você pode trocar aqui dentro.</div>
+          {pinMessage && <><div className="spacer" /><div className="notice">{pinMessage}</div></>}
+          {message && <><div className="spacer" /><div className="notice">{message}</div></>}
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="page-shell">
       <div className="topbar">
@@ -84,13 +207,14 @@ function ParentsContent() {
         </div>
         <div className="topbar-actions">
           <Link className="btn btn-soft" href="/dashboard">Voltar</Link>
+          <button className="btn btn-blue" onClick={() => { sessionStorage.removeItem(PIN_SESSION_KEY); setPinReady(false); }}>Bloquear área</button>
           <LogoutButton />
         </div>
       </div>
 
       <div className="hero">
         <h1>Relatório geral</h1>
-        <p>Os pais controlam bônus, removem livros e visualizam tudo que foi lido, jogado e concluído.</p>
+        <p>Somente os pais podem entrar aqui com PIN, dar bônus, remover livros, apagar crianças e trocar o PIN de acesso.</p>
       </div>
 
       <div className="stats">
@@ -100,12 +224,35 @@ function ParentsContent() {
         <div className="stat orange"><strong>{report.pages}</strong><span>Páginas lidas</span></div>
       </div>
 
+      {message && <><div className="spacer" /><div className="notice">{message}</div></>}
+
       <div className="grid">
         <div className="card"><h3>Minutos totais</h3><div className="notice">{report.minutes} minutos</div></div>
         <div className="card"><h3>Movimentações</h3><div className="notice">{report.history} registros</div></div>
       </div>
 
-      {message && <><div className="spacer" /><div className="notice">{message}</div></>}
+      <div className="spacer" />
+
+      <div className="card">
+        <h2>Trocar PIN dos pais</h2>
+        <form className="grid-2" onSubmit={changePin}>
+          <div>
+            <label className="label">PIN atual</label>
+            <input className="input" type="password" value={pinForm.current} onChange={(e) => setPinForm({ ...pinForm, current: e.target.value })} required />
+          </div>
+          <div>
+            <label className="label">Novo PIN</label>
+            <input className="input" type="password" value={pinForm.next} onChange={(e) => setPinForm({ ...pinForm, next: e.target.value })} required />
+          </div>
+          <div>
+            <label className="label">Confirmar novo PIN</label>
+            <input className="input" type="password" value={pinForm.confirm} onChange={(e) => setPinForm({ ...pinForm, confirm: e.target.value })} required />
+          </div>
+          <div style={{ display: 'flex', alignItems: 'end' }}>
+            <button className="btn btn-primary btn-block" type="submit">Salvar novo PIN</button>
+          </div>
+        </form>
+      </div>
 
       <div className="spacer" />
       <div className="card">
@@ -164,7 +311,9 @@ function ParentsContent() {
               <div>Minutos ganhos: +{log.minutes_earned}</div>
             </div>
           ))}
+          {logs.length === 0 && <p className="muted">Nenhuma leitura ainda.</p>}
         </div>
+
         <div className="card">
           <h2>Últimas movimentações de minutos</h2>
           {minutes.slice(0, 10).map((item) => (
@@ -172,9 +321,10 @@ function ParentsContent() {
               <strong>{item.kind === 'bonus' ? '🎁 Bônus' : item.kind === 'usage' ? '🎮 Uso' : '⏱️ Leitura'}</strong>
               <div className="muted">{new Date(item.created_at).toLocaleString('pt-BR')}</div>
               <div>{item.note ?? 'Sem observação'}</div>
-              <div>{item.minutes_delta > 0 ? '+' : ''}{item.minutes_delta} min</div>
+              <div>Variação: {item.minutes_delta > 0 ? '+' : ''}{item.minutes_delta} min</div>
             </div>
           ))}
+          {minutes.length === 0 && <p className="muted">Nenhuma movimentação ainda.</p>}
         </div>
       </div>
     </div>

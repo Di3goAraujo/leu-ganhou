@@ -5,7 +5,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import { AuthGuard } from '@/components/auth-guard';
 import { LogoutButton } from '@/components/logout-button';
-import type { Child, Book, ReadingLog, MinuteTransaction } from '@/lib/types';
+import type { Child } from '@/lib/types';
 
 export default function DashboardPage() {
   return (
@@ -59,9 +59,7 @@ function DashboardContent() {
     await loadChildren();
   }
 
-  const totals = useMemo(() => ({
-    children: children.length,
-  }), [children]);
+  const totals = useMemo(() => ({ children: children.length }), [children]);
 
   return (
     <div className="page-shell">
@@ -71,21 +69,21 @@ function DashboardContent() {
           <h1 style={{ margin: '4px 0 0' }}>Leu, Ganhou!</h1>
         </div>
         <div className="topbar-actions">
-          <Link className="btn btn-blue" href="/dashboard/parents">Área dos pais</Link>
+          <Link className="btn btn-blue" href="/dashboard/parents">Área dos pais 🔐</Link>
           <LogoutButton />
         </div>
       </div>
 
       <div className="hero">
         <h1>Perfis das crianças</h1>
-        <p>Cadastre crianças, abra o perfil de cada uma e acompanhe leitura, minutos e relatórios em nuvem.</p>
+        <p>Cadastre crianças, abra o perfil de cada uma e acompanhe a leitura. A área dos pais continua protegida por PIN.</p>
       </div>
 
       <div className="stats">
         <div className="stat purple"><strong>{totals.children}</strong><span>Crianças</span></div>
         <div className="stat green"><strong>2</strong><span>Min por página</span></div>
         <div className="stat blue"><strong>100%</strong><span>Dados online</span></div>
-        <div className="stat orange"><strong>Web</strong><span>MVP profissional</span></div>
+        <div className="stat orange"><strong>PIN</strong><span>Pais protegidos</span></div>
       </div>
 
       <div className="grid">
@@ -118,12 +116,12 @@ function DashboardContent() {
         </div>
 
         <div className="card">
-          <h2>Próximos passos</h2>
+          <h2>Como ficou agora</h2>
           <ul className="list-clean muted">
-            <li>• Cada criança tem livros e progresso próprios.</li>
-            <li>• Os pais gerenciam bônus e remoções na área dos pais.</li>
-            <li>• O banco salva tudo no Supabase.</li>
-            <li>• A publicação web pode ser feita na Vercel.</li>
+            <li>• A criança cadastra livro e registra leitura.</li>
+            <li>• A área dos pais pede PIN sempre que for aberta.</li>
+            <li>• O PIN pode ser alterado pelos responsáveis.</li>
+            <li>• Só os pais podem apagar criança, apagar livro e dar bônus.</li>
           </ul>
         </div>
       </div>
